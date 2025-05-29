@@ -1,47 +1,33 @@
 package com.alexis.storage
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.alexis.storage.ui.theme.StorageTheme
+import androidx.lifecycle.lifecycleScope
+import com.alexis.wrapperstorage.core.model.enums.StorageType
+import com.alexis.wrapperstorage.presentation.manager.StorageManager
+import com.alexis.wrapperstorage.presentation.model.StorageKey
+import com.alexis.wrapperstorage.presentation.model.User
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            StorageTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
-            }
+        lifecycleScope.launch {
+            val storageManager = StorageManager.getInstance(
+                this@MainActivity,
+                StorageType.SHARED_PREFERENCES,
+                "WRAPPER_STORAGE"
+            )
+            val storageKey = StorageKey<String>("A", "MainA", "Alexis")
+            val storageKey2 = StorageKey<User>("B", "MainB", "Alex")
+
+            storageManager.put(storageKey, "Alexis")
+            storageManager.put(storageKey2, User("Alexis", 25))
+
+            val username = storageManager.get(storageKey, "null")
+            val user = storageManager.get(storageKey2, User("null", 0))
+            Log.e("****Storage****", "User Name: $username, User: $user")
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    StorageTheme {
-        Greeting("Android")
     }
 }
