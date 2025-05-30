@@ -1,9 +1,9 @@
 package com.alexis.wrapperstorage.core.util
 
-import com.alexis.wrapperstorage.core.model.Serializer
+import com.alexis.wrapperstorage.core.model.ISerializer
 import com.google.gson.Gson
 
-class GsonSerializer : Serializer {
+class GsonSerializer : ISerializer {
 
     private val gson = Gson()
 
@@ -11,7 +11,8 @@ class GsonSerializer : Serializer {
         return gson.toJson(obj)
     }
 
-    override fun <T> deserialize(json: String, clazz: Class<T>): T {
-        return gson.fromJson(json, clazz)
+    override fun <T> deserialize(obj: String?, defaultValue: T): T {
+        return obj?.let { gson.fromJson(obj, defaultValue!!::class.java) } ?: defaultValue
     }
+
 }
