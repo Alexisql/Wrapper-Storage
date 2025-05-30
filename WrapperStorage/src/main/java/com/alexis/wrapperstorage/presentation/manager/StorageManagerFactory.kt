@@ -12,7 +12,7 @@ class StorageManagerFactory @Inject constructor(
     private val serializer: ISerializer
 ) {
     fun createConfig(config: StorageConfig): StorageManager {
-        val storageManager = StorageFactory().createStorage(context, config, serializer)
+        val storageManager = StorageFactory.createStorage(context, config, serializer)
         return StorageManager(storageManager)
     }
 }

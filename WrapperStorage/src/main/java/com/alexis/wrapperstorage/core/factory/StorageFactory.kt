@@ -8,20 +8,26 @@ import com.alexis.wrapperstorage.data.local.datastore.StorageDataStore
 import com.alexis.wrapperstorage.data.local.sharedpreferences.StorageSharedPreferences
 import com.alexis.wrapperstorage.presentation.model.StorageConfig
 
-class StorageFactory : IStorageFactory {
-    override fun createStorage(
-        context: Context,
-        config: StorageConfig,
-        serializer: ISerializer
-    ): IStorageManager {
-        return when (config.storageType) {
-            StorageTypeEnum.SHARED_PREFERENCES -> StorageSharedPreferences(
-                context,
-                config.storageName,
-                serializer
-            )
+class StorageFactory {
+    companion object {
+        fun createStorage(
+            context: Context,
+            config: StorageConfig,
+            serializer: ISerializer
+        ): IStorageManager {
+            return when (config.storageType) {
+                StorageTypeEnum.SHARED_PREFERENCES -> StorageSharedPreferences(
+                    context,
+                    config.storageName,
+                    serializer
+                )
 
-            StorageTypeEnum.DATA_STORE -> StorageDataStore(context, config.storageName, serializer)
+                StorageTypeEnum.DATA_STORE -> StorageDataStore(
+                    context,
+                    config.storageName,
+                    serializer
+                )
+            }
         }
     }
 }
