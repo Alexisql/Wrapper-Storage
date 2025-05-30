@@ -1,59 +1,69 @@
 package com.alexis.wrapperstorage.data.local.datastore
 
 import android.content.Context
-import android.content.SharedPreferences
-import androidx.core.content.edit
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.doublePreferencesKey
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.floatPreferencesKey
+import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
 import com.alexis.wrapperstorage.core.manager.IStorageManager
-import com.alexis.wrapperstorage.core.model.Serializer
-import com.alexis.wrapperstorage.core.util.GsonSerializer
-import com.alexis.wrapperstorage.di.WrapperStorageModule
+import com.alexis.wrapperstorage.core.model.ISerializer
 import com.alexis.wrapperstorage.presentation.model.StorageKey
-import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
-class StorageDataStore @Inject constructor(
-    @ApplicationContext private val context: Context,
-    @WrapperStorageModule.StorageName private val storageName: String
+class StorageDataStore(
+    private val context: Context,
+    private val storageName: String,
+    private val serializer: ISerializer
 ) : IStorageManager {
 
-    private val serializer: Serializer = GsonSerializer()
-    private val sharedPreferences: SharedPreferences by lazy {
-        context.getSharedPreferences(storageName, Context.MODE_PRIVATE)
-    }
+    private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(storageName)
+    private val dataStore = context.dataStore
 
     override suspend fun <T> put(key: StorageKey<T>, value: T) {
         val fullKey = key.fullKey()
-        sharedPreferences.edit {
+        dataStore.edit { preferences ->
             when (value) {
-                is String -> putString(fullKey, value)
-                is Int -> putInt(fullKey, value)
-                is Boolean -> putBoolean(fullKey, value)
-                is Float -> putFloat(fullKey, value)
-                is Long -> putLong(fullKey, value)
-                else -> putString(fullKey, serializer.serialize(value))
+                is Int -> preferences[intPreferencesKey(fullKey)] = value
+                is Long -> preferences[longPreferencesKey(fullKey)] = value
+                is Boolean -> preferences[booleanPreferencesKey(fullKey)] = value
+                is Float -> preferences[floatPreferencesKey(fullKey)] = value
+                is Double -> preferences[doublePreferencesKey(fullKey)] = value
+                is String -> preferences[stringPreferencesKey(fullKey)] = value
+                else -> preferences[stringPreferencesKey(fullKey)] = serializer.serialize(value)
             }
         }
     }
 
-    override suspend fun <T> get(key: StorageKey<T>, defaultValue: T): T {
+    @Suppress("UNCHECKED_CAST")
+    override fun <T> get(key: StorageKey<T>, defaultValue: T): Flow<T> {
         val fullKey = key.fullKey()
-        return when (defaultValue) {
-            is String -> sharedPreferences.getString(fullKey, defaultValue) as T
-            is Int -> sharedPreferences.getInt(fullKey, defaultValue) as T
-            is Boolean -> sharedPreferences.getBoolean(fullKey, defaultValue) as T
-            is Float -> sharedPreferences.getFloat(fullKey, defaultValue) as T
-            is Long -> sharedPreferences.getLong(fullKey, defaultValue) as T
-            else ->  deserialize(fullKey, defaultValue!!)
+        return dataStore.data.map { preferences ->
+            when (defaultValue) {
+                is Int -> (preferences[intPreferencesKey(fullKey)] ?: defaultValue) as T
+                is Long -> (preferences[longPreferencesKey(fullKey)] ?: defaultValue) as T
+                is Boolean -> (preferences[booleanPreferencesKey(fullKey)] ?: defaultValue) as T
+                is Float -> (preferences[floatPreferencesKey(fullKey)] ?: defaultValue) as T
+                is Double -> (preferences[doublePreferencesKey(fullKey)] ?: defaultValue) as T
+                is String -> (preferences[stringPreferencesKey(fullKey)] ?: defaultValue) as T
+                else -> serializer.deserialize(
+                    preferences[stringPreferencesKey(fullKey)],
+                    defaultValue
+                )
+            }
         }
     }
 
     override suspend fun <T> remove(key: StorageKey<T>) {
-        sharedPreferences.edit { remove(key.fullKey()) }
-    }
-
-    private fun <T> deserialize(fullKey: String, defaultValue: T): T {
-        val json = sharedPreferences.getString(fullKey, null)
-        return json?.let { serializer.deserialize(it, defaultValue!!::class.java) } ?: defaultValue
+        dataStore.edit { preferences ->
+            preferences.remove(stringPreferencesKey(key.fullKey()))
+        }
     }
 
 }

@@ -4,19 +4,18 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
 import com.alexis.wrapperstorage.core.manager.IStorageManager
-import com.alexis.wrapperstorage.core.model.Serializer
-import com.alexis.wrapperstorage.core.util.GsonSerializer
-import com.alexis.wrapperstorage.di.WrapperStorageModule
+import com.alexis.wrapperstorage.core.model.ISerializer
 import com.alexis.wrapperstorage.presentation.model.StorageKey
-import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
-class StorageSharedPreferences @Inject constructor(
-    @ApplicationContext private val context: Context,
-    @WrapperStorageModule.StorageName private val storageName: String
+class StorageSharedPreferences(
+    private val context: Context,
+    private val storageName: String,
+    private val serializer: ISerializer
 ) : IStorageManager {
 
-    private val serializer: Serializer = GsonSerializer()
     private val sharedPreferences: SharedPreferences by lazy {
         context.getSharedPreferences(storageName, Context.MODE_PRIVATE)
     }
@@ -35,25 +34,22 @@ class StorageSharedPreferences @Inject constructor(
         }
     }
 
-    override suspend fun <T> get(key: StorageKey<T>, defaultValue: T): T {
+    @Suppress("UNCHECKED_CAST")
+    override fun <T> get(key: StorageKey<T>, defaultValue: T): Flow<T> {
         val fullKey = key.fullKey()
-        return when (defaultValue) {
+        val value: T = when (defaultValue) {
             is String -> sharedPreferences.getString(fullKey, defaultValue) as T
             is Int -> sharedPreferences.getInt(fullKey, defaultValue) as T
             is Boolean -> sharedPreferences.getBoolean(fullKey, defaultValue) as T
             is Float -> sharedPreferences.getFloat(fullKey, defaultValue) as T
             is Long -> sharedPreferences.getLong(fullKey, defaultValue) as T
-            else ->  deserialize(fullKey, defaultValue!!)
+            else -> serializer.deserialize(sharedPreferences.getString(fullKey, null), defaultValue)
         }
+        return MutableStateFlow(value).asStateFlow()
     }
 
     override suspend fun <T> remove(key: StorageKey<T>) {
         sharedPreferences.edit { remove(key.fullKey()) }
-    }
-
-    private fun <T> deserialize(fullKey: String, defaultValue: T): T {
-        val json = sharedPreferences.getString(fullKey, null)
-        return json?.let { serializer.deserialize(it, defaultValue!!::class.java) } ?: defaultValue
     }
 
 }

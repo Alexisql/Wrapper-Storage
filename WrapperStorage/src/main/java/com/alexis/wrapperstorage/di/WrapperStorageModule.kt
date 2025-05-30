@@ -3,45 +3,48 @@ package com.alexis.wrapperstorage.di
 import android.content.Context
 import com.alexis.wrapperstorage.core.factory.StorageFactory
 import com.alexis.wrapperstorage.core.manager.IStorageManager
+import com.alexis.wrapperstorage.core.model.ISerializer
 import com.alexis.wrapperstorage.core.model.enums.StorageTypeEnum
+import com.alexis.wrapperstorage.core.util.GsonSerializer
+import com.alexis.wrapperstorage.presentation.manager.StorageManagerFactory
+import com.alexis.wrapperstorage.presentation.model.StorageConfig
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import javax.inject.Qualifier
 import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
 object WrapperStorageModule {
 
-    @Qualifier
-    @Retention(AnnotationRetention.RUNTIME)
-    annotation class StorageName
+    private var storageConfig: StorageConfig = StorageConfig(
+        storageName = "STORAGE_WRAPPER",
+        storageType = StorageTypeEnum.DATA_STORE
+    )
 
-    private var storageTypeEnum: StorageTypeEnum = StorageTypeEnum.SHARED_PREFERENCES
-    private var storageName: String = "WRAPPER_STORAGE"
-
-    fun setStorageType(storageTypeEnum: StorageTypeEnum) {
-        this.storageTypeEnum = storageTypeEnum
-    }
-
-    fun setStorageName(storageName: String) {
-        this.storageName = storageName
+    @Provides
+    @Singleton
+    fun provideSerializer(): ISerializer {
+        return GsonSerializer()
     }
 
     @Provides
     @Singleton
-    @StorageName
-    fun provideStorageName(): String {
-        return storageName
+    fun provideStorage(
+        @ApplicationContext context: Context,
+        serializer: ISerializer
+    ): IStorageManager {
+        return StorageFactory().createStorage(context, storageConfig, serializer)
     }
 
     @Provides
     @Singleton
-    fun provideStorage(@ApplicationContext context: Context): IStorageManager {
-        return StorageFactory().createStorage(context, storageTypeEnum, storageName)
-    }
+    fun provideStorageManagerFactory(
+        @ApplicationContext context: Context,
+        serializer: ISerializer
+    ): StorageManagerFactory =
+        StorageManagerFactory(context, serializer)
 
 }

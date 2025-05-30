@@ -12,6 +12,8 @@ appcompat = "1.7.0"
 material = "1.12.0"
 daggerHilt = "2.48"
 gson = "2.11.0"
+datastorePreferences = "1.1.7"
+datastoreProto = "1.1.7"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -33,6 +35,8 @@ material = { group = "com.google.android.material", name = "material", version.r
 dagger-hilt = { group = "com.google.dagger", name = "hilt-android", version.ref = "daggerHilt" }
 dagger-hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "daggerHilt" }
 gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
+datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastorePreferences" }
+datastore-proto = { group = "androidx.datastore", name = "datastore", version.ref = "datastoreProto" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

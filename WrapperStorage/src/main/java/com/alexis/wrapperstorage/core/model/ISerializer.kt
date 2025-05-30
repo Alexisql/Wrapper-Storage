@@ -1,6 +1,6 @@
 package com.alexis.wrapperstorage.core.model
 
-interface Serializer {
+interface ISerializer {
     fun <T> serialize(obj: T): String
-    fun <T> deserialize(json: String, clazz: Class<T>): T
+    fun <T> deserialize(obj: String?, defaultValue: T): T
 }
