@@ -8,7 +8,7 @@ import com.alexis.wrapperstorage.data.local.datastore.StorageDataStore
 import com.alexis.wrapperstorage.data.local.sharedpreferences.StorageSharedPreferences
 import com.alexis.wrapperstorage.presentation.model.StorageConfig
 
-class StorageFactory {
+internal class StorageFactory {
     companion object {
         fun createStorage(
             context: Context,
