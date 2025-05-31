@@ -26,25 +26,20 @@ object WrapperStorageModule {
 
     @Provides
     @Singleton
-    fun provideSerializer(): ISerializer {
-        return GsonSerializer()
-    }
+    fun provideSerializer(): ISerializer = GsonSerializer()
 
     @Provides
     @Singleton
     fun provideStorage(
         @ApplicationContext context: Context,
         serializer: ISerializer
-    ): IStorageManager {
-        return StorageFactory().createStorage(context, storageConfig, serializer)
-    }
+    ): IStorageManager = StorageFactory.createStorage(context, storageConfig, serializer)
 
     @Provides
     @Singleton
     fun provideStorageManagerFactory(
         @ApplicationContext context: Context,
         serializer: ISerializer
-    ): StorageManagerFactory =
-        StorageManagerFactory(context, serializer)
+    ): StorageManagerFactory = StorageManagerFactory(context, serializer)
 
 }
