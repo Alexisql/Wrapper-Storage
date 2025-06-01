@@ -5,12 +5,22 @@ import android.content.SharedPreferences
 import androidx.core.content.edit
 import com.alexis.wrapperstorage.core.manager.IStorageManager
 import com.alexis.wrapperstorage.core.model.ISerializer
+import com.alexis.wrapperstorage.core.util.StorageKeyHelper
 import com.alexis.wrapperstorage.presentation.model.StorageKey
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flowOf
+import javax.inject.Inject
 
-class StorageSharedPreferences(
+/**
+ * Implementación de [IStorageManager] que utiliza SharedPreferences para la persistencia de datos clave-valor.
+ *
+ * Permite almacenar, recuperar y eliminar datos de diferentes tipos, serializando objetos complejos mediante [ISerializer].
+ *
+ * @property context Contexto de la aplicación.
+ * @property storageName Nombre del archivo de SharedPreferences.
+ * @property serializer Serializador para objetos personalizados.
+ */
+class StorageSharedPreferences @Inject constructor(
     private val context: Context,
     private val storageName: String,
     private val serializer: ISerializer
@@ -20,9 +30,15 @@ class StorageSharedPreferences(
         context.getSharedPreferences(storageName, Context.MODE_PRIVATE)
     }
 
+    /**
+     * Guarda un valor asociado a la clave proporcionada en SharedPreferences.
+     *
+     * @param key Clave de almacenamiento.
+     * @param value Valor a guardar.
+     */
     override suspend fun <T> put(key: StorageKey<T>, value: T) {
-        val fullKey = key.fullKey()
-        sharedPreferences.edit {
+        val fullKey = key.toString()
+        sharedPreferences.edit(commit = true) {
             when (value) {
                 is String -> putString(fullKey, value)
                 is Int -> putInt(fullKey, value)
@@ -34,9 +50,16 @@ class StorageSharedPreferences(
         }
     }
 
+    /**
+     * Obtiene el valor asociado a la clave proporcionada desde SharedPreferences.
+     *
+     * @param key Clave de almacenamiento.
+     * @param defaultValue Valor por defecto si la clave no existe.
+     * @return Un [Flow] que emite el valor almacenado o el valor por defecto.
+     */
     @Suppress("UNCHECKED_CAST")
     override fun <T> get(key: StorageKey<T>, defaultValue: T): Flow<T> {
-        val fullKey = key.fullKey()
+        val fullKey = key.toString()
         val value: T = when (defaultValue) {
             is String -> sharedPreferences.getString(fullKey, defaultValue) as T
             is Int -> sharedPreferences.getInt(fullKey, defaultValue) as T
@@ -45,11 +68,25 @@ class StorageSharedPreferences(
             is Long -> sharedPreferences.getLong(fullKey, defaultValue) as T
             else -> serializer.deserialize(sharedPreferences.getString(fullKey, null), defaultValue)
         }
-        return MutableStateFlow(value).asStateFlow()
+        return flowOf(value)
     }
 
+    /**
+     * Elimina el valor asociado a la clave proporcionada en SharedPreferences.
+     *
+     * @param key Clave de almacenamiento a eliminar.
+     */
     override suspend fun <T> remove(key: StorageKey<T>) {
-        sharedPreferences.edit { remove(key.fullKey()) }
+        sharedPreferences.edit { remove(key.toString()) }
+    }
+
+    /**
+     * Obtiene todas las claves almacenadas, agrupadas por pantalla.
+     *
+     * @return Un [Flow] que emite un mapa donde la clave es el identificador de pantalla y el valor es la lista de [StorageKey].
+     */
+    override fun getAllKeys(): Flow<Map<String, List<StorageKey<*>>>> {
+        return flowOf(StorageKeyHelper.groupKeysByScreen(sharedPreferences.all.keys))
     }
 
 }
