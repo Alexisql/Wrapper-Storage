@@ -1,13 +1,11 @@
 package com.alexis.wrapperstorage.di
 
 import android.content.Context
-import com.alexis.wrapperstorage.core.factory.StorageFactory
-import com.alexis.wrapperstorage.core.manager.IStorageManager
 import com.alexis.wrapperstorage.core.model.ISerializer
-import com.alexis.wrapperstorage.core.model.enums.StorageTypeEnum
 import com.alexis.wrapperstorage.core.util.GsonSerializer
 import com.alexis.wrapperstorage.data.local.datastore.StorageDataStore
 import com.alexis.wrapperstorage.data.local.sharedpreferences.StorageSharedPreferences
+import com.alexis.wrapperstorage.presentation.manager.StorageManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -20,74 +18,59 @@ const val STORAGE_NAME_DEFAULT = "STORAGE_WRAPPER"
 
 @Qualifier
 @Retention(AnnotationRetention.RUNTIME)
-annotation class StorageTypeDatastore
-
-@Qualifier
-@Retention(AnnotationRetention.RUNTIME)
-annotation class StorageTypeSharedPreferences
-
-@Qualifier
-@Retention(AnnotationRetention.RUNTIME)
 annotation class SharedPreferences
 
 @Qualifier
 @Retention(AnnotationRetention.RUNTIME)
-annotation class DatastoreStorage
+annotation class Datastore
 
 /**
- * Módulo de Dagger Hilt para proveer las dependencias relacionadas con el almacenamiento de datos.
+ * Módulo de Hilt para proveer dependencias relacionadas con el almacenamiento de datos.
  *
- * Expone implementaciones de [IStorageManager] utilizando DataStore y SharedPreferences,
- * así como el serializador [ISerializer] basado en Gson. Utiliza calificadores personalizados
- * para distinguir entre los diferentes tipos de almacenamiento.
+ * Expone implementaciones de [IStorageManager] utilizando tanto SharedPreferences como DataStore,
+ * así como el serializador utilizado para la conversión de objetos.
+ *
+ * - Usa las anotaciones [SharedPreferences] y [Datastore] para distinguir las implementaciones.
+ * - El nombre de almacenamiento por defecto es [STORAGE_NAME_DEFAULT].
  */
 @Module
 @InstallIn(SingletonComponent::class)
 object WrapperStorageModule {
 
-    @Provides
-    @Singleton
-    @StorageTypeDatastore
-    fun provideDatastore(): StorageTypeEnum {
-        return StorageTypeEnum.DATA_STORE
-    }
-
-    @Provides
-    @Singleton
-    @StorageTypeSharedPreferences
-    fun provideSharedPreferences(): StorageTypeEnum {
-        return StorageTypeEnum.SHARED_PREFERENCES
-    }
-
+    /**
+     * Provee una instancia singleton de [ISerializer] basada en Gson.
+     */
     @Provides
     @Singleton
     fun provideSerializer(): ISerializer = GsonSerializer()
 
-    @Provides
-    @Singleton
-    fun provideStorage(
-        @ApplicationContext context: Context,
-        @StorageTypeSharedPreferences storageType: StorageTypeEnum,
-        serializer: ISerializer
-    ): IStorageManager =
-        StorageFactory.createStorage(context, STORAGE_NAME_DEFAULT, storageType, serializer)
-
-    @DatastoreStorage
+    /**
+     * Provee una instancia singleton de [StorageManager] que utiliza DataStore como almacenamiento.
+     *
+     * @param context Contexto de la aplicación.
+     * @param serializer Serializador para objetos personalizados.
+     */
+    @Datastore
     @Provides
     @Singleton
     fun provideDatastoreStorage(
         @ApplicationContext context: Context,
         serializer: ISerializer
-    ): IStorageManager {
-        return StorageDataStore(context,STORAGE_NAME_DEFAULT, serializer)
-    }
+    ): StorageManager = StorageManager(StorageDataStore(context, STORAGE_NAME_DEFAULT, serializer))
 
+    /**
+     * Provee una instancia singleton de [StorageManager] que utiliza SharedPreferences como almacenamiento.
+     *
+     * @param context Contexto de la aplicación.
+     * @param serializer Serializador para objetos personalizados.
+     */
     @SharedPreferences
     @Provides
     @Singleton
     fun provideSharedPreferencesStorage(
         @ApplicationContext context: Context,
         serializer: ISerializer
-    ): IStorageManager =
-        StorageSharedPreferences(context, STORAGE_NAME_DEFAULT, serializer)
+    ): StorageManager =
+        StorageManager(StorageSharedPreferences(context, STORAGE_NAME_DEFAULT, serializer))
+
 }
