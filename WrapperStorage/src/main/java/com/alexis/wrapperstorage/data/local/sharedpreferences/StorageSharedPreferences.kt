@@ -7,8 +7,6 @@ import com.alexis.wrapperstorage.core.manager.IStorageManager
 import com.alexis.wrapperstorage.core.model.ISerializer
 import com.alexis.wrapperstorage.core.util.StorageKeyHelper
 import com.alexis.wrapperstorage.presentation.model.StorageKey
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
 import javax.inject.Inject
 
 /**
@@ -55,12 +53,12 @@ class StorageSharedPreferences @Inject constructor(
      *
      * @param key Clave de almacenamiento.
      * @param defaultValue Valor por defecto si la clave no existe.
-     * @return Un [Flow] que emite el valor almacenado o el valor por defecto.
+     * @return El valor almacenado o el valor por defecto.
      */
     @Suppress("UNCHECKED_CAST")
-    override fun <T> get(key: StorageKey<T>, defaultValue: T): Flow<T> {
+    override suspend fun <T> get(key: StorageKey<T>, defaultValue: T): T {
         val fullKey = key.toString()
-        val value: T = when (defaultValue) {
+        return when (defaultValue) {
             is String -> sharedPreferences.getString(fullKey, defaultValue) as T
             is Int -> sharedPreferences.getInt(fullKey, defaultValue) as T
             is Boolean -> sharedPreferences.getBoolean(fullKey, defaultValue) as T
@@ -68,7 +66,6 @@ class StorageSharedPreferences @Inject constructor(
             is Long -> sharedPreferences.getLong(fullKey, defaultValue) as T
             else -> serializer.deserialize(sharedPreferences.getString(fullKey, null), defaultValue)
         }
-        return flowOf(value)
     }
 
     /**
@@ -76,8 +73,8 @@ class StorageSharedPreferences @Inject constructor(
      *
      * @param key Clave de almacenamiento a eliminar.
      */
-    override suspend fun <T> remove(key: StorageKey<T>) {
-        sharedPreferences.edit { remove(key.toString()) }
+    override suspend fun remove(key: String) {
+        sharedPreferences.edit { remove(key) }
     }
 
     /**
@@ -86,10 +83,10 @@ class StorageSharedPreferences @Inject constructor(
      * Filtra las preferencias por el identificador de pantalla proporcionado y retorna un flujo con el resultado.
      *
      * @param screen Identificador de la pantalla para filtrar las preferencias.
-     * @return Un [Flow] que emite un mapa donde la clave es el nombre de la preferencia y el valor es el dato almacenado.
+     * @return Un mapa donde la clave es el nombre de la preferencia y el valor es el dato almacenado.
      */
-    override fun getPreferencesByScreen(screen: String): Flow<Map<String, *>> {
-        return flowOf(StorageKeyHelper.filterPreferencesByScreen(sharedPreferences.all, screen))
+    override suspend fun getPreferencesByScreen(screen: String): Map<String, *> {
+        return StorageKeyHelper.filterPreferencesByScreen(sharedPreferences.all, screen)
     }
 
 }
