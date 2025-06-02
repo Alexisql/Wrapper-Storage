@@ -1,34 +1,23 @@
 package com.alexis.wrapperstorage.core.util
 
-import com.alexis.wrapperstorage.presentation.model.StorageKey
-
 /**
- * Carácter separador utilizado para construir y descomponer claves de almacenamiento en formato cadena.
- */
-const val SEPARATOR = ","
-
-/**
- * Utilidad interna para manipular y agrupar claves de almacenamiento.
+ * Utilidad interna para manipular y filtrar claves de almacenamiento.
  *
- * Proporciona métodos para convertir cadenas de claves en instancias de [StorageKey]
- * y agruparlas según la pantalla a la que pertenecen.
+ * Proporciona métodos para filtrar preferencias según el identificador de pantalla,
+ * facilitando la obtención de datos agrupados por pantalla.
  */
 internal object StorageKeyHelper {
     /**
-     * Agrupa una colección de claves en formato cadena por el identificador de pantalla.
+     * Filtra las preferencias almacenadas para obtener solo aquellas asociadas a una pantalla específica.
      *
-     * Convierte cada cadena en una instancia de [StorageKey] si tiene el formato correcto,
-     * y luego agrupa las claves por la propiedad `screen`.
-     *
-     * @param keys Colección de claves en formato cadena.
-     * @return Mapa donde la clave es el identificador de pantalla y el valor es la lista de [StorageKey] asociadas.
+     * @param preferences Mapa de todas las preferencias almacenadas, donde la clave es el nombre de la preferencia.
+     * @param screen Identificador de la pantalla para filtrar las preferencias.
+     * @return Un mapa con las preferencias cuyo nombre contiene el identificador de pantalla.
      */
-    fun groupKeysByScreen(
-        keys: Collection<String>
-    ): Map<String, List<StorageKey<*>>> {
-        return keys.mapNotNull { key ->
-            val parts = key.split(SEPARATOR)
-            if (parts.size == 3) StorageKey<Any>(parts[0], parts[1], parts[2]) else null
-        }.groupBy { it.screen }
+    fun filterPreferencesByScreen(
+        preferences: Map<String, *>,
+        screen: String
+    ): Map<String, *> {
+        return preferences.filter { (key, _) -> key.contains(screen) }
     }
 }

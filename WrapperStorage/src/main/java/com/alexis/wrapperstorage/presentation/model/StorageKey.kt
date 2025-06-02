@@ -10,4 +10,9 @@ package com.alexis.wrapperstorage.presentation.model
  * @param client Identificador del cliente o usuario.
  * @param T Tipo de dato asociado a la clave.
  */
-data class StorageKey<T>(val name: String, val screen: String, val client: String)
+data class StorageKey<T>(val name: String, val screen: String, val client: String){
+    override fun toString(): String {
+        return "$name-$screen-$client"
+    }
+}
+

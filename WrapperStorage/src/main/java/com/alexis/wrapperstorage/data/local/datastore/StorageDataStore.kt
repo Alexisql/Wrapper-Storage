@@ -96,13 +96,19 @@ class StorageDataStore @Inject constructor(
     }
 
     /**
-     * Obtiene todas las claves almacenadas, agrupadas por pantalla.
+     * Obtiene todas las preferencias almacenadas asociadas a una pantalla específica.
      *
-     * @return Un [Flow] que emite un mapa donde la clave es el identificador de pantalla y el valor es la lista de [StorageKey].
+     * Filtra las preferencias por el identificador de pantalla proporcionado y retorna un flujo con el resultado.
+     *
+     * @param screen Identificador de la pantalla para filtrar las preferencias.
+     * @return Un [Flow] que emite un mapa donde la clave es el nombre de la preferencia y el valor es el dato almacenado.
      */
-    override fun getAllKeys(): Flow<Map<String, List<StorageKey<*>>>> {
+    override fun getPreferencesByScreen(screen: String): Flow<Map<String, *>> {
         return storage.data.map { preferences ->
-            StorageKeyHelper.groupKeysByScreen(preferences.asMap().keys.map { it.toString() })
+            StorageKeyHelper.filterPreferencesByScreen(
+                preferences.asMap().mapKeys { it.key.name },
+                screen
+            )
         }
     }
 
