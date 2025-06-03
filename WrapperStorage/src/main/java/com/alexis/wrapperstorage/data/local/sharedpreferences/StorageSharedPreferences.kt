@@ -3,10 +3,12 @@ package com.alexis.wrapperstorage.data.local.sharedpreferences
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
-import com.alexis.wrapperstorage.core.manager.IStorageManager
-import com.alexis.wrapperstorage.core.model.ISerializer
-import com.alexis.wrapperstorage.core.util.StorageKeyHelper
-import com.alexis.wrapperstorage.presentation.model.StorageKey
+import com.alexis.wrapperstorage.domain.manager.IStorageManager
+import com.alexis.wrapperstorage.data.util.serializer.ISerializer
+import com.alexis.wrapperstorage.data.util.PreferenceHelper
+import com.alexis.wrapperstorage.domain.model.StorageKey
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import javax.inject.Inject
 
 /**
@@ -53,12 +55,12 @@ class StorageSharedPreferences @Inject constructor(
      *
      * @param key Clave de almacenamiento.
      * @param defaultValue Valor por defecto si la clave no existe.
-     * @return El valor almacenado o el valor por defecto.
+     * @return Un [Flow] que emite el valor almacenado o el valor por defecto.
      */
     @Suppress("UNCHECKED_CAST")
-    override suspend fun <T> get(key: StorageKey<T>, defaultValue: T): T {
+    override fun <T> get(key: StorageKey<T>, defaultValue: T): Flow<T> {
         val fullKey = key.toString()
-        return when (defaultValue) {
+        val value: T = when (defaultValue) {
             is String -> sharedPreferences.getString(fullKey, defaultValue) as T
             is Int -> sharedPreferences.getInt(fullKey, defaultValue) as T
             is Boolean -> sharedPreferences.getBoolean(fullKey, defaultValue) as T
@@ -66,6 +68,7 @@ class StorageSharedPreferences @Inject constructor(
             is Long -> sharedPreferences.getLong(fullKey, defaultValue) as T
             else -> serializer.deserialize(sharedPreferences.getString(fullKey, null), defaultValue)
         }
+        return flowOf(value)
     }
 
     /**
@@ -83,10 +86,10 @@ class StorageSharedPreferences @Inject constructor(
      * Filtra las preferencias por el identificador de pantalla proporcionado y retorna un flujo con el resultado.
      *
      * @param screen Identificador de la pantalla para filtrar las preferencias.
-     * @return Un mapa donde la clave es el nombre de la preferencia y el valor es el dato almacenado.
+     * @return Un [Flow] que emite un mapa donde la clave es el nombre de la preferencia y el valor es el dato almacenado.
      */
-    override suspend fun getPreferencesByScreen(screen: String): Map<String, *> {
-        return StorageKeyHelper.filterPreferencesByScreen(sharedPreferences.all, screen)
+    override fun getPreferencesByScreen(screen: String): Flow<Map<String, *>> {
+        return flowOf(PreferenceHelper.filterPreferencesByScreen(sharedPreferences.all, screen))
     }
 
 }

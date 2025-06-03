@@ -1,4 +1,4 @@
-package com.alexis.wrapperstorage.presentation.model
+package com.alexis.wrapperstorage.domain.model
 
 /**
  * Representa una clave compuesta para identificar valores almacenados de forma única.

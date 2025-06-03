@@ -1,11 +1,11 @@
 package com.alexis.wrapperstorage.di
 
 import android.content.Context
-import com.alexis.wrapperstorage.core.model.ISerializer
-import com.alexis.wrapperstorage.core.util.GsonSerializer
+import com.alexis.wrapperstorage.data.util.serializer.ISerializer
+import com.alexis.wrapperstorage.data.util.serializer.impl.GsonSerializer
 import com.alexis.wrapperstorage.data.local.datastore.StorageDataStore
 import com.alexis.wrapperstorage.data.local.sharedpreferences.StorageSharedPreferences
-import com.alexis.wrapperstorage.presentation.manager.StorageManager
+import com.alexis.wrapperstorage.domain.manager.impl.StorageManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

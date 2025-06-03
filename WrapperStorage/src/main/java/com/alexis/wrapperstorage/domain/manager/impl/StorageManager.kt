@@ -1,6 +1,6 @@
-package com.alexis.wrapperstorage.presentation.manager
+package com.alexis.wrapperstorage.domain.manager.impl
 
-import com.alexis.wrapperstorage.core.manager.IStorageManager
+import com.alexis.wrapperstorage.domain.manager.IStorageManager
 import javax.inject.Inject
 import javax.inject.Singleton
 

@@ -11,11 +11,11 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import com.alexis.wrapperstorage.core.manager.IStorageManager
-import com.alexis.wrapperstorage.core.model.ISerializer
-import com.alexis.wrapperstorage.core.util.StorageKeyHelper
-import com.alexis.wrapperstorage.presentation.model.StorageKey
-import kotlinx.coroutines.flow.first
+import com.alexis.wrapperstorage.domain.manager.IStorageManager
+import com.alexis.wrapperstorage.data.util.serializer.ISerializer
+import com.alexis.wrapperstorage.data.util.PreferenceHelper
+import com.alexis.wrapperstorage.domain.model.StorageKey
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
@@ -64,10 +64,10 @@ class StorageDataStore @Inject constructor(
      *
      * @param key Clave de almacenamiento.
      * @param defaultValue Valor por defecto si la clave no existe.
-     * @return El valor almacenado o el valor por defecto.
+     * @return Un [Flow] que emite el valor almacenado o el valor por defecto.
      */
     @Suppress("UNCHECKED_CAST")
-    override suspend fun <T> get(key: StorageKey<T>, defaultValue: T): T {
+    override fun <T> get(key: StorageKey<T>, defaultValue: T): Flow<T> {
         val fullKey = key.toString()
         return storage.data.map { preferences ->
             when (defaultValue) {
@@ -81,7 +81,7 @@ class StorageDataStore @Inject constructor(
                     preferences[stringPreferencesKey(fullKey)], defaultValue
                 )
             }
-        }.first()
+        }
     }
 
     /**
@@ -101,15 +101,15 @@ class StorageDataStore @Inject constructor(
      * Filtra las preferencias por el identificador de pantalla proporcionado y retorna un flujo con el resultado.
      *
      * @param screen Identificador de la pantalla para filtrar las preferencias.
-     * @return Un mapa donde la clave es el nombre de la preferencia y el valor es el dato almacenado.
+     * @return Un [Flow] que emite un mapa donde la clave es el nombre de la preferencia y el valor es el dato almacenado.
      */
-    override suspend fun getPreferencesByScreen(screen: String): Map<String, *> {
+    override fun getPreferencesByScreen(screen: String): Flow<Map<String, *>> {
         return storage.data.map { preferences ->
-            StorageKeyHelper.filterPreferencesByScreen(
+            PreferenceHelper.filterPreferencesByScreen(
                 preferences.asMap().mapKeys { it.key.name },
                 screen
             )
-        }.first()
+        }
     }
 
 }

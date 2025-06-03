@@ -1,4 +1,4 @@
-package com.alexis.wrapperstorage.core.model
+package com.alexis.wrapperstorage.data.util.serializer
 
 /**
  * Interfaz para la serialización y deserialización de objetos genéricos.

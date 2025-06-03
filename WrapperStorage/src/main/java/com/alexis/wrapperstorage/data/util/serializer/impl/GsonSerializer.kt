@@ -1,6 +1,6 @@
-package com.alexis.wrapperstorage.core.util
+package com.alexis.wrapperstorage.data.util.serializer.impl
 
-import com.alexis.wrapperstorage.core.model.ISerializer
+import com.alexis.wrapperstorage.data.util.serializer.ISerializer
 import com.google.gson.Gson
 
 /**

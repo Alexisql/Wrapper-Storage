@@ -1,4 +1,4 @@
-package com.alexis.wrapperstorage.core.util
+package com.alexis.wrapperstorage.data.util
 
 /**
  * Utilidad interna para manipular y filtrar claves de almacenamiento.
@@ -6,7 +6,7 @@ package com.alexis.wrapperstorage.core.util
  * Proporciona métodos para filtrar preferencias según el identificador de pantalla,
  * facilitando la obtención de datos agrupados por pantalla.
  */
-internal object StorageKeyHelper {
+internal object PreferenceHelper {
     /**
      * Filtra las preferencias almacenadas para obtener solo aquellas asociadas a una pantalla específica.
      *
