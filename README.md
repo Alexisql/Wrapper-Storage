@@ -11,7 +11,7 @@ WrapperStorage es un módulo de almacenamiento clave-valor para Android, diseña
 
 ###### Incluir dependencia gradle
 ```
-implementation 'com.github.Alexisql:Wrapper-Storage:1.1.5'
+implementation 'com.github.Alexisql:Wrapper-Storage:1.1.6'
 ```
 ### Implementación:
 
@@ -40,6 +40,11 @@ lifecycleScope.launch {
             storage.put(key, "Value")
         }
 ```
+###### Exception
+Para controlar el guardado de preferencias manejamos la excepcion PutException(val key: String, val value: String) con el mensaje personalizado "Se presento un error al guardar la preferencia con clave $key y valor $value"
+
+<hr>
+
 ###### Obtener datos
 Para la funcion obtener, necesitaremos nuestra key y un valor por defecto en caso que no exista ningun dato con esa key.
 Esta funcion nos retorna un Flow<T>.
@@ -50,6 +55,11 @@ lifecycleScope.launch {
             }
         }
 ```
+###### Exception
+Para controlar la obtencion de preferencias manejamos la excepcion GetException(val key: String) con el mensaje personalizado "Se presento un error al obtener la preferencia con clave $key"
+
+<hr>
+
 ###### Eliminar datos
 Para la funcion eliminar, necesitaremos nuestra key.
 Esta es una funcion suspendida, por ende debemos ejecutarla dentro de una corrutina u otra funcion suspendida.
@@ -58,6 +68,11 @@ lifecycleScope.launch {
             storage.remove(key.toString())
         }
 ```
+###### Exception
+Para controlar la eliminacion de preferencias manejamos la excepcion RemoveException(val key: String) con el mensaje personalizado "Se presento un error al eliminar la preferencia con clave $key"
+
+<hr>
+
 ###### Obtener datos por pantalla
 Para la funcion obtener datos por pantalla, necesitaremos la variable screen de nuestra key.
 Esta funcion nos retorna un Flow<Map<String, *>>.
@@ -68,6 +83,8 @@ lifecycleScope.launch {
             }
         }
 ```
+###### Exception
+Para controlar la eliminacion de preferencias manejamos la excepcion GetPreferencesException(val screen: String) con el mensaje personalizado "Se presento un error al obtener las preferencias de la pantalla $screen"
 
 
 
