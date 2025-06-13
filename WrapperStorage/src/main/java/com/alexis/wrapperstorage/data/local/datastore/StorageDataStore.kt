@@ -11,9 +11,8 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import com.alexis.wrapperstorage.domain.manager.IStorageManager
 import com.alexis.wrapperstorage.data.util.serializer.ISerializer
-import com.alexis.wrapperstorage.data.util.PreferenceHelper
+import com.alexis.wrapperstorage.domain.manager.IStorageManager
 import com.alexis.wrapperstorage.domain.model.StorageKey
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -105,10 +104,7 @@ class StorageDataStore @Inject constructor(
      */
     override fun getPreferencesByScreen(screen: String): Flow<Map<String, *>> {
         return storage.data.map { preferences ->
-            PreferenceHelper.filterPreferencesByScreen(
-                preferences.asMap().mapKeys { it.key.name },
-                screen
-            )
+            preferences.asMap().mapKeys { it.key.name }
         }
     }
 

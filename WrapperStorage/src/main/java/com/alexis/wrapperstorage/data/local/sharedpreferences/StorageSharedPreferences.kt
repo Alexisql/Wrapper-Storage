@@ -3,9 +3,8 @@ package com.alexis.wrapperstorage.data.local.sharedpreferences
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
-import com.alexis.wrapperstorage.domain.manager.IStorageManager
 import com.alexis.wrapperstorage.data.util.serializer.ISerializer
-import com.alexis.wrapperstorage.data.util.PreferenceHelper
+import com.alexis.wrapperstorage.domain.manager.IStorageManager
 import com.alexis.wrapperstorage.domain.model.StorageKey
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
@@ -89,7 +88,7 @@ class StorageSharedPreferences @Inject constructor(
      * @return Un [Flow] que emite un mapa donde la clave es el nombre de la preferencia y el valor es el dato almacenado.
      */
     override fun getPreferencesByScreen(screen: String): Flow<Map<String, *>> {
-        return flowOf(PreferenceHelper.filterPreferencesByScreen(sharedPreferences.all, screen))
+        return flowOf(sharedPreferences.all)
     }
 
 }
