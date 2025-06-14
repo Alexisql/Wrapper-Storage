@@ -8,10 +8,26 @@ WrapperStorage es un módulo de almacenamiento clave-valor para Android, diseña
 [Storage Test](https://github.com/Alexisql/TestWrapperStorage) Es una app donde implementamos Wrapper Storage, siguiendo la arquitectura recomenda por Android. 
 
 ### Configuración:
-
-###### Incluir dependencia gradle
+#### build.gradle (:app)
 ```
-implementation 'com.github.Alexisql:Wrapper-Storage:1.1.6'
+implementation 'com.github.Alexisql:Wrapper-Storage:1.1.7'
+```
+#### settings.gradle
+```
+repositories {
+     ...
+     maven {
+       url = uri("https://jitpack.io")
+     }
+}
+
+dependencyResolutionManagement {
+     ...
+     maven {
+       url = uri("https://jitpack.io")
+     }
+
+}
 ```
 ### Implementación:
 
